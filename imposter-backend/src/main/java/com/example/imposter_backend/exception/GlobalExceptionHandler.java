@@ -12,6 +12,11 @@ public class GlobalExceptionHandler  {
         ApiResponse response = new ApiResponse(ex.getMessage(), null);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(IllegalAccessException.class)
+    public ResponseEntity<ApiResponse> handleIllegalAccesException (IllegalAccessException ex){
+        ApiResponse response = new ApiResponse(ex.getMessage(), null);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse> handleGeneralException(Exception ex) {
         ApiResponse response = new ApiResponse("An internal server error occurred: " + ex.getMessage(), null);

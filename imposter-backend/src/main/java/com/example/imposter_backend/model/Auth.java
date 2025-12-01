@@ -13,7 +13,7 @@ public class Auth {
     private String email;
 
     @Column(name="hashed_password")
-    private String HashedPassword;
+    private String hashedPassword;
 
     public Auth (){
 
@@ -34,10 +34,10 @@ public class Auth {
         this.email = email;
     }
     public String getHashedPassword(){
-        return HashedPassword;
+        return hashedPassword;
     }
     public void setHashedPassword(String HashedPassword){
-        this.HashedPassword = HashedPassword;
+        this.hashedPassword = HashedPassword;
     }
 
 

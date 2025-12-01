@@ -2,14 +2,16 @@ package com.example.imposter_backend.controller;
 
 import java.util.List;
 
+import com.example.imposter_backend.response.AuthDTO.RegistrationRequestDTO;
+import com.example.imposter_backend.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.imposter_backend.model.Player;
 import com.example.imposter_backend.response.ApiResponse;
-import com.example.imposter_backend.response.LoginRequestDTO;
-import com.example.imposter_backend.response.RegistrationRequestDTO;
+import com.example.imposter_backend.response.AuthDTO.LoginRequestDTO;
+import com.example.imposter_backend.response.AuthDTO.LoginResponseDTO;
 import com.example.imposter_backend.service.PlayerService;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -19,8 +21,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PlayerController {
     
         private final PlayerService playerService;
-    public PlayerController(PlayerService playerService) {
+        private final AuthService authService;
+    public PlayerController(PlayerService playerService,  AuthService authService) {
         this.playerService = playerService;
+        this.authService = authService;
     }
 
 
@@ -59,13 +63,13 @@ public class PlayerController {
     }   
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerPlayer( @RequestBody RegistrationRequestDTO request){
-        String response = playerService.register(request);
+        String response = authService.register(request);
         return ResponseEntity.ok(new ApiResponse(response, null));
     }
-    @GetMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<Player> loginPlayer(@RequestBody LoginRequestDTO request) {
-        Player player = playerService.login(request);
-        return ResponseEntity.ok(player);
+        LoginResponseDTO response = authService.login(request);
+        return ResponseEntity.ok(new ApiResponse("Login succesfull", null));
     }
     
 }

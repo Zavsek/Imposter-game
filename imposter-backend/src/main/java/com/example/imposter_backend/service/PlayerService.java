@@ -2,26 +2,28 @@ package com.example.imposter_backend.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.mindrot.jbcrypt.BCrypt;
+
+import com.example.imposter_backend.response.AuthDTO.LoginResponseDTO;
+import io.jsonwebtoken.Jwts;
 import org.springframework.stereotype.Service;
 
-import com.example.imposter_backend.model.Auth;
+
 import com.example.imposter_backend.model.Player;
 import com.example.imposter_backend.repository.AuthRepository;
 import com.example.imposter_backend.repository.PlayerRepository;
-import com.example.imposter_backend.response.LoginRequestDTO;
-import com.example.imposter_backend.response.RegistrationRequestDTO;
+
 @Service    
 public class PlayerService {
 
-    private final AuthRepository authRepository;
+
     private final PlayerRepository playerRepository;
-    private final AuthService authService;
-    public PlayerService(PlayerRepository playerRepository, AuthService authService, AuthRepository authRepository) {
+    private final JwtService jwtService;
+    public PlayerService(PlayerRepository playerRepository, JwtService jwtService) {
         this.playerRepository = playerRepository;
-        this.authService = authService;
-        this.authRepository = authRepository;
+        this.jwtService = jwtService;
+
     }
 
     public List<Player> getAllPlayers(){
@@ -50,40 +52,31 @@ public class PlayerService {
         }
         return false;
     }
-    
-    public String register (RegistrationRequestDTO request){
-        if(playerRepository.existstByEmail(request.email())){
-            throw new IllegalArgumentException("Email is already registered");
-        }
+    public LoginResponseDTO createGuest(Optional<String> userName){
+        String finalUsername = userName.orElseGet(() -> {
+              return generateRandomUsername();
+        });
+        Player guest = new Player();
+        guest.setUsername(finalUsername);
+        guest.setAuth(null);
 
-        Auth auth = new Auth();
-        auth.setEmail(request.email());
-        auth.setHashedPassword(authService.hashPassword(request.password()));
-        
-        authRepository.save(auth);
+        Player savedGuest = playerRepository.save(guest);
 
-        Player player = new Player();
-        player.setUsername(request.username());
-        player.setAuth(auth);
-        
-        playerRepository.save(player);
-
-        return "Registration Successfull";
+        String token = jwtService.generateToken(savedGuest);
+        return new LoginResponseDTO(
+                savedGuest.getId(),
+                savedGuest.getUsername(),
+                token,
+                savedGuest.getCreatedAt()
+        );
     }
-    public Player login(LoginRequestDTO request){
-            Optional<Auth> authExists = authRepository.findByEmail(request.email());
-            if(authExists.isPresent()){
-                String requestPass = request.password();
-                Auth auth = authExists.get();
-                String userPass = auth.getHashedPassword();
-                boolean authenticated = BCrypt.checkpw(requestPass, userPass);
-                if(authenticated) {
-                    return playerRepository.findByAuth(auth);
-                }
-                else throw new IllegalArgumentException("Creadentials do not match");
-            }
-            else throw new IllegalArgumentException("Creadentials do not match");
-        }
+
+    private String generateRandomUsername(){
+        String shortUuid = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        return "Gost_" + shortUuid;
+    }
+    
+
     }
 
 
