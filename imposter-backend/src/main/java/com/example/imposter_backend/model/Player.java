@@ -1,4 +1,4 @@
-package com.example.imposter_backend.Player;
+package com.example.imposter_backend.model;
 
 import jakarta.persistence.*;
 
@@ -12,16 +12,8 @@ public class Player {
     @Column(name = "name", nullable = false, unique = true)
     private String username;
 
-    @Column(nullable = false)
-    private String role; // e.g., "imposter" or "crewmate"
 
-    // Constructors
-    public Player() {}
 
-    public Player(String username, String role) {
-        this.username = username;
-        this.role = role;
-    }
 
     // Getters and Setters
     public Long getId() {
@@ -40,12 +32,4 @@ public class Player {
         this.username = username;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-    
 }
