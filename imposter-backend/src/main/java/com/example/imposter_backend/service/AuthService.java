@@ -14,6 +14,7 @@ import com.example.imposter_backend.response.AuthDTO.RegistrationRequestDTO;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.*;
 
@@ -33,8 +34,11 @@ public class AuthService {
     }
     @Transactional
     public String register (RegistrationRequestDTO request){
-        if(playerRepository.existstByEmail(request.email())){
+        if(authRepository.existsByEmail(request.email())){
             throw new IllegalArgumentException("Email is already registered");
+        }
+        if(!checkEmailValidity(request.email())){
+            throw new IllegalArgumentException("Email is not valid");
         }
 
         Auth auth = new Auth();
@@ -64,5 +68,10 @@ public class AuthService {
                 return new LoginResponseDTO(player.getId(), player.getUsername(), token, LocalDateTime.now());
 
 
+        }
+
+        public boolean checkEmailValidity(String email){
+            String regexPattern = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\\\.[A-Za-z0-9-]+)*(\\\\.[A-Za-z]{2,})$";
+             return Pattern.compile(regexPattern).matcher(email).matches();
         }
 }

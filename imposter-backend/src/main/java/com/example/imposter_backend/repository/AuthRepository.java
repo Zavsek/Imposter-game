@@ -10,4 +10,5 @@ import com.example.imposter_backend.model.Auth;
 @Repository
 public interface AuthRepository  extends JpaRepository<Auth, Long>{
         Optional<Auth> findByEmail(String email);
+        boolean existsByEmail(String email);
 }

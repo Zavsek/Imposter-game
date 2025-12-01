@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.util.function.Function;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 public class JwtService {
     @Value("${app.jwt.secret}")
     private  String SECRET_KEY;
-    @Value("${app.jwt.expiration}")
+    @Value("${app.jwt.expiration-ms}")
     private  int EXPIRATION_TIME;
 
     public String generateToken(Player player) {
@@ -40,9 +41,10 @@ public class JwtService {
                 compact();
     }
 
-    public boolean isTokenValid(String token, Player player) {
-        final String subject = extractSubject(token);
-        return (subject.equals(player.getId().toString()) && !isTokenExpired(token));
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String subjectFromToken = extractSubject(token);
+        final String principal = userDetails.getUsername();
+        return (subjectFromToken.equals(principal) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {

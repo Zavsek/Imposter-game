@@ -1,6 +1,7 @@
 package com.example.imposter_backend.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.imposter_backend.response.AuthDTO.RegistrationRequestDTO;
 import com.example.imposter_backend.service.AuthService;
@@ -67,9 +68,13 @@ public class PlayerController {
         return ResponseEntity.ok(new ApiResponse(response, null));
     }
     @PostMapping("/login")
-    public ResponseEntity<Player> loginPlayer(@RequestBody LoginRequestDTO request) {
+    public ResponseEntity<ApiResponse> loginPlayer(@RequestBody LoginRequestDTO request) {
         LoginResponseDTO response = authService.login(request);
-        return ResponseEntity.ok(new ApiResponse("Login succesfull", null));
+        return ResponseEntity.ok(new ApiResponse("Login succesfull", response));
     }
-    
+    @PostMapping("/guest")
+    public ResponseEntity<ApiResponse> guestPlayer(@RequestBody Optional<String> username) {
+        LoginResponseDTO response = playerService.createGuest(username);
+        return ResponseEntity.ok(new ApiResponse("Guest Created Succefully", response));
+    }
 }

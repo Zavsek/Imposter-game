@@ -11,7 +11,6 @@ import com.example.imposter_backend.model.Player;
 
 @Repository
 public interface PlayerRepository  extends JpaRepository<Player, Long> {
-    boolean existstByEmail(String email);;
     Optional<Player> findByAuth(Auth auth);
     }
 
