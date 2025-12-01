@@ -8,7 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.imposter_backend.model.Player;
 import com.example.imposter_backend.response.ApiResponse;
+import com.example.imposter_backend.response.LoginRequestDTO;
+import com.example.imposter_backend.response.RegistrationRequestDTO;
 import com.example.imposter_backend.service.PlayerService;
+import org.springframework.web.bind.annotation.GetMapping;
+
 
 @RestController
 @RequestMapping("/api/users")
@@ -53,4 +57,15 @@ public class PlayerController {
         }
         return ResponseEntity.ok(new ApiResponse("Player deleted successfully", null));
     }   
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse> registerPlayer( @RequestBody RegistrationRequestDTO request){
+        String response = playerService.register(request);
+        return ResponseEntity.ok(new ApiResponse(response, null));
+    }
+    @GetMapping("/login")
+    public ResponseEntity<Player> loginPlayer(@RequestBody LoginRequestDTO request) {
+        Player player = playerService.login(request);
+        return ResponseEntity.ok(player);
+    }
+    
 }

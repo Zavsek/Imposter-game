@@ -6,12 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.example.imposter_backend.model.Auth;
-import com.example.imposter_backend.model.Player;
-import java.util.List;
 
 @Repository
-public interface PlayerRepository  extends JpaRepository<Player, Long> {
-    boolean existstByEmail(String email);;
-    Player findByAuth(Auth auth);
-    }
-
+public interface AuthRepository  extends JpaRepository<Auth, Long>{
+        Optional<Auth> findByEmail(String email);
+}
