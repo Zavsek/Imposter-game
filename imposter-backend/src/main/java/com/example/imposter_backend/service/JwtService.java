@@ -18,14 +18,13 @@ import java.util.Map;
 
 @Service
 public class JwtService {
-    @Value("${app.jwt.secret}")
-    private  String SECRET_KEY;
+
+    private static final String SECRET_KEY = "NGNhZjE4Yzg5M2YzNDI3MmI0YmZmMmU4YjAyYjA1ZDEyYjU0ZGM2YjE5YzI4NjcwYjJiZGY0N2MyY2Y5NGRl";
     @Value("${app.jwt.expiration-ms}")
     private  int EXPIRATION_TIME;
 
     public String generateToken(Player player) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("username", player.getUsername());
         return createToken(claims, player.getId().toString());
     }
     private String createToken(Map<String, Object> claims, String subject) {
@@ -42,9 +41,11 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String subjectFromToken = extractSubject(token);
-        final String principal = userDetails.getUsername();
-        return (subjectFromToken.equals(principal) && !isTokenExpired(token));
+
+        final String playerIdFromToken = extractSubject(token);
+        final String playerIdFromDetails = userDetails.getUsername(); // Uporabite ID, ki ste ga prej shranili
+
+        return (playerIdFromToken.equals(playerIdFromDetails) && !isTokenExpired(token));
     }
 
     private boolean isTokenExpired(String token) {

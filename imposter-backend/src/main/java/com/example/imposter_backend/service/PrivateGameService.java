@@ -45,7 +45,6 @@ public class PrivateGameService {
         List<String> imposterNames = determineImposters(names, numOfImposters);
         PrivateGame game = new PrivateGame();
         game.setHost(player);
-        game.setFinishedAt(null);
         game.setImposterHint(imposterHint);
         game.setWord(word);
         PrivateGame createdGame = privateGameRepository.save(game);

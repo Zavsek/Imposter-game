@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Table(name ="private_game")
@@ -28,7 +29,7 @@ public class PrivateGame {
     @Column(name="created_at", nullable = false, updatable=false)
     private LocalDateTime createdAt;
 
-    @Column(name="finished_at", nullable = false, updatable=true)
+    @Column(name="finished_at", nullable = true, updatable=true)
     private LocalDateTime finishedAt;
 
 
