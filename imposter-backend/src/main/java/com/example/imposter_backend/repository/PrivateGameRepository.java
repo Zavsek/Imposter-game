@@ -1,0 +1,9 @@
+package com.example.imposter_backend.repository;
+
+import com.example.imposter_backend.model.PrivateGame;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface PrivateGameRepository extends JpaRepository<PrivateGame,Long> {
+}

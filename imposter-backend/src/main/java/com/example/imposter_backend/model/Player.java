@@ -23,7 +23,7 @@ public class Player {
     private Auth auth;
     
     @CreationTimestamp
-    @Column(name="created_at", nullable = false, updatable=true)
+    @Column(name="created_at", nullable = false, updatable=false)
     private LocalDateTime createdAt;
 
     public Player(){
