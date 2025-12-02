@@ -71,9 +71,9 @@ public class PrivateGame {
     public void setImposterHint(String imposterHint) {
         this.imposterHint = imposterHint;
     }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    @PrePersist
+    public void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public void setFinishedAt(LocalDateTime finishedAt) {
