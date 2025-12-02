@@ -18,7 +18,7 @@ public class Player {
     @Column(name = "name")
     private String username;
 
-    @OneToOne
+    @OneToOne(optional = true, cascade = CascadeType.ALL)
     @JoinColumn(name="auth_id")
     private Auth auth;
     
