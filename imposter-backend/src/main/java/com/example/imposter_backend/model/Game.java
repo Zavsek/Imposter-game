@@ -55,8 +55,8 @@ public class Game {
         this.state = state;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    private void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public void setFinishedAt(LocalDateTime finishedAt) {
@@ -116,7 +116,7 @@ public class Game {
     }
 
     public void setStartedAt(LocalDateTime startedAt) {
-        this.startedAt = startedAt;
+        this.createdAt = startedAt;
     }
 
     public LocalDateTime getStartedAt() {

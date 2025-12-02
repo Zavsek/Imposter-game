@@ -22,7 +22,7 @@ public class Participation {
 
     @ManyToOne
     @JoinColumn(name="voted_for_player_id", nullable = false)
-    private Player participant;
+    private Player votedForPlayer;
 
     public void setId(Long id) {
         this.id = id;
@@ -40,8 +40,8 @@ public class Participation {
         this.game = game;
     }
 
-    public void setParticipant(Player participant) {
-        this.participant = participant;
+    public void setVote(Player votedForPlayer) {
+        this.votedForPlayer = votedForPlayer;
     }
 
     public Long getId() {
@@ -60,7 +60,7 @@ public class Participation {
         return game;
     }
 
-    public Player getParticipant() {
-        return participant;
+    public Player getvotedForPlayer() {
+        return votedForPlayer;
     }
 }

@@ -73,7 +73,7 @@ public class PrivateGame {
         this.imposterHint = imposterHint;
     }
     @PrePersist
-    public void setCreatedAt() {
+    private void setCreatedAt() {
         this.createdAt = LocalDateTime.now();
     }
 
