@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 @Service
 public class PlayerDetailsService implements UserDetailsService {
@@ -24,18 +25,37 @@ public class PlayerDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String playerIdString) throws UsernameNotFoundException {
-        Long id = Long.parseLong(playerIdString); // Ne potrebujemo več try-catch, če je koda pravilna.
+        Long id;
+        try {
+            id = Long.parseLong(playerIdString);
+        } catch (NumberFormatException e) {
+            throw new UsernameNotFoundException("Invalid player ID format");
+        }
 
-        return playerRepository.findById(id)
-                .map(player -> {
+        Player player = playerRepository.findById(id)
+                .orElseThrow(() -> new UsernameNotFoundException("Player not found with id: " + id));
 
-                    return new org.springframework.security.core.userdetails.User(
-                            player.getId().toString(), // Username = ID
-                            player.getAuth().getHashedPassword(),
-                            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
-                    );
-                })
-                .orElseThrow(() -> new UsernameNotFoundException("Player not found with id: " + playerIdString));
+
+        String password;
+        List<SimpleGrantedAuthority> authorities;
+
+        if (player.getAuth() != null) {
+            //Registered
+            password = player.getAuth().getHashedPassword();
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            // Guest
+
+            password = "";
+            authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_GUEST"));
+        }
+
+
+        return new User(
+                player.getId().toString(),
+                password,
+                authorities
+        );
         }
 
 
