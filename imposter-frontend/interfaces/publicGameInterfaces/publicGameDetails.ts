@@ -1,4 +1,4 @@
-import participant from "../privateGameTypes/participant"
+import participant from "../privateGameInterfaces/participant"
 interface publicGameDetails{
     id:number,
     word:string,

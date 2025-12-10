@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { isTokenExpired } from "../isTokenExpired";
 import { axiosInstance } from "../axios";
 import axios from "axios";
-import { loginRequest, loginResponse, registerRequest } from "@/types";
+import { loginRequest, loginResponse, registerRequest } from "@/interfaces";
 
 interface AuthState {
   checkingAuth: boolean;
