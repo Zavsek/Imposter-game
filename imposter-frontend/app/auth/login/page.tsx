@@ -22,8 +22,8 @@ export default function LoginPage() {
     const handleRegistrationClick= ()=>{
       router.push("/auth/register");
     }
-    const postLogin =()=>{
-      login(request);
+    const postLogin = async ()=>{
+      await login(request);
     }
   return (
     <div className="glass-card px-10 mt-10 backdrop-blur-xs  shadow-2xl flex-col items-center ">
@@ -45,11 +45,12 @@ export default function LoginPage() {
       />
 
       <button 
-        onClick={()=>postLogin}
-        className="w-full bg-[rgba(0,0,100,0.6)] text-[#FF493C] font-normal  border-2 border-white py-2 rounded science-gothic cursor-pointer mt-10 "
-      >
-        {checkingAuth ? <VscLoading className="animate-spin "/>: "Login"}
-      </button>
+                 onClick={postLogin}
+                 disabled={ checkingAuth}
+                 className="w-full bg-[rgba(0,0,100,0.6)] text-[#FF493C] font-normal  border-2 border-white py-2 rounded science-gothic cursor-pointer mt-5 "
+               >
+                 {checkingAuth ? <VscLoading className="animate-spin w-full "/>: "Login"}
+               </button>
       <div className="text-white/60 text-sm mt-2">Don't have an account yet? <span className="cursor-pointer text-[rgba(50,30,160,0.8)]  " onClick={handleRegistrationClick}>Register</span></div>
     </div>
   );

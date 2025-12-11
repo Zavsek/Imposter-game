@@ -63,7 +63,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               );
             }
           } else {
-            toast.error("Unexpected error.");
+            toast.error("An unexpected error occured.");
           }
         } finally {
           set({ checkingAuth: false });
@@ -86,12 +86,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
             if (error.response.status === 409) {
-              toast.error("Uporabnik s tem imenom ali e-pošto že obstaja.");
+              toast.error("A user With this email already exists.");
             } else {
-              toast.error(`Napaka pri registraciji: ${error.response.status}`);
+              toast.error(`Error in registration: ${error.response.status}`);
             }
           } else {
-            toast.error("Prišlo je do nepričakovanega omrežnega problema.");
+            toast.error("Unexpected network error.");
           }
         } finally {
           set({ registering: false });
@@ -116,7 +116,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       storage: createJSONStorage(() => localStorage),
       onRehydrateStorage: () => (state, error) => {
         if (error) {
-          console.error("Napaka pri hidraciji Zustanda:", error);
+          console.error("Error in hidration:", error);
           return;
         }
 
