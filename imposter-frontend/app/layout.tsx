@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect} from "react";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import "./globals.css";
-import { VscLoading } from "react-icons/vsc";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,19 +32,18 @@ const router = useRouter();
  }, [checkAuthOnAppLoad]
 
 )
-  if(checkingAuth && !isAuthenticated) return(
-    <div className="w-screen, h-screen flex align-middle justify-between"><VscLoading className="animate-spin w-5 h-5 bg-gray-50"/></div>
-  )
-  else if(!isAuthenticated){
-
-    router.push('/auth/login/')
-  }
+ useEffect(() => {
+    if (!checkingAuth && !isAuthenticated) {
+      router.push('/auth/login/');
+    }
+  }, [isAuthenticated, checkingAuth, router]);
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster/>
         {children}
       </body>
     </html>
