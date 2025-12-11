@@ -39,24 +39,15 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register", "/api/users/login", "/api/users/guest")
                         .permitAll()
                         .requestMatchers("/api/private-game/**")
-                        .permitAll()
+                        .hasAnyAuthority("ROLE_USER", "ROLE_GUEST")
                         .anyRequest()
                         .authenticated())
                         .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .authenticationProvider(autheticationProvider())
                         .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
     }
-    @Bean
-    public AuthenticationProvider autheticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(userDetailsService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        return daoAuthenticationProvider;
-    }
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
+
 }
