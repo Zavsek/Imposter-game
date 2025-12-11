@@ -38,7 +38,8 @@ export default function RegisterPage() {
                 return;
             }
         try {
-      await register(request);
+      const registrationSucces = await register(request);
+      if(registrationSucces) router.push("/auth/login");
     } catch (error) {
       toast.error("Registration failed. Please try again.");
     } finally {

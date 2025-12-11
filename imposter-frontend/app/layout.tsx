@@ -7,6 +7,7 @@ import { useEffect} from "react";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import Header from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 const router = useRouter();
- const {checkAuthOnAppLoad, isAuthenticated, checkingAuth} = useAuthStore();
+ const {checkAuthOnAppLoad, isAuthenticated, checkingAuth, username} = useAuthStore();
 
  useEffect(()=>{
   checkAuthOnAppLoad()
@@ -39,10 +40,12 @@ const router = useRouter();
   }, [isAuthenticated, checkingAuth, router]);
 
   return (
+
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
+        <div className='w-screen h-screen  bg-[linear-gradient(160deg,#DE0F00,55%,#FF9088)] relative'>
+          <Header username={username}/>
+
 <Toaster
           toastOptions={{
             className: "",
@@ -54,11 +57,12 @@ const router = useRouter();
               padding: "20px", 
               background: "rgba(10,10,10,1)",
               color:"#fa3d2f",
-              filter: "drop-shadow(0.5rem 0.5rem 50px rgba(255, 255, 255, 0.5))"
+              filter: "drop-shadow(0.5rem 0.5rem 50px rgba(255, 255, 255, 0.5))",
             },
           }}
-        />
+          />
         {children}
+          </div>
       </body>
     </html>
   );

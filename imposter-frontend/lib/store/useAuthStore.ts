@@ -20,9 +20,9 @@ interface AuthState {
 interface AuthActions {
   login: (request: loginRequest) => void;
   logout: () => void;
-  register: (request: registerRequest) => void;
+  register: (request: registerRequest) => Promise<boolean>;
   setHydrated: () => void;
-  checkAuthOnAppLoad: () => boolean;
+  checkAuthOnAppLoad: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -77,21 +77,25 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           jwtToken: null,
           isAuthenticated: false,
         }),
-
-      register: async (request: registerRequest) => {
+        //return type of boolean to tell the program if it needs to redirect to login
+      register: async (request: registerRequest): Promise<boolean> => {
         set({ registering: true });
         try {
           const response = await axiosInstance.post("/users/register", request);
-          toast.success("succesfully registered");
+          toast.success("succesfully registered. Please sign in!");
+          return true;
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
             if (error.response.status === 409) {
               toast.error("A user With this email already exists.");
+              return false;
             } else {
               toast.error(`Error in registration: ${error.response.status}`);
+              return false;
             }
           } else {
             toast.error("Unexpected network error.");
+            return false;
           }
         } finally {
           set({ registering: false });
@@ -100,7 +104,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       setHydrated: () => set({ isHydrated: true }),
 
-      checkAuthOnAppLoad: () => {
+      checkAuthOnAppLoad: async(): Promise<boolean> => {
         const state = get();
         if (state.jwtToken && !isTokenExpired(state.jwtToken)) {
           set({ isAuthenticated: true });
