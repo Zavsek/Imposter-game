@@ -43,7 +43,21 @@ const router = useRouter();
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Toaster/>
+<Toaster
+          toastOptions={{
+            className: "",
+            style: {
+              border: "6px solid rgba(13, 0, 80, 0.8)",
+              borderRadius: "5px",
+              backgroundColor: "#fff",
+              marginTop:"10px",
+              padding: "20px", 
+              background: "rgba(10,10,10,1)",
+              color:"#fa3d2f",
+              filter: "drop-shadow(0.5rem 0.5rem 50px rgba(255, 255, 255, 0.5))"
+            },
+          }}
+        />
         {children}
       </body>
     </html>
