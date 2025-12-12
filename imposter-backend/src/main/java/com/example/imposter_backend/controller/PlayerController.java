@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class PlayerController {
     
         private final PlayerService playerService;

@@ -14,3 +14,5 @@ export type{default as publicGameDetails} from "./publicGameInterfaces/publicGam
 export type{default as publicGameJoinDetails} from "./publicGameInterfaces/publicGameJoinDetails";
 export type{default as startGame} from "./publicGameInterfaces/startGame";
 export type{default as voteCast} from "./publicGameInterfaces/voteCast";
+
+export type{default as ApiResponse} from "./ApiResponse"

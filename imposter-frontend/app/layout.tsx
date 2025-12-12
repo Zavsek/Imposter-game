@@ -37,6 +37,9 @@ const router = useRouter();
     if (!checkingAuth && !isAuthenticated) {
       router.push('/auth/login/');
     }
+    else{
+      router.push("/home")
+    }
   }, [isAuthenticated, checkingAuth, router]);
 
   return (
