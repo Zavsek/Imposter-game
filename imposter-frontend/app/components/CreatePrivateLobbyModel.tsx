@@ -1,16 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { VscLoading, VscAdd, VscClose, VscChevronRight } from "react-icons/vsc"
 import { FaUserSecret, FaTrashAlt, FaLock } from "react-icons/fa";
-import { usePrivateGameStore } from '@/lib/store/usePrivateGameStore'; // Uporabimo vaš store
-import { useAuthStore } from '@/lib/store/useAuthStore'; // Za pridobitev hostId
+import { usePrivateGameStore } from '@/lib/store/usePrivateGameStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-// Predpostavljam, da je vaš vmesnik uvožen iz te datoteke in ima polji hostId in imposterHint
-import { createGameRequest } from '@/interfaces'; 
+import { createGameRequest } from '@/interfaces';
 
-// Omejitve iz vašega Backenda
+
+import { PRESET_WORD_LISTS } from '@/lib/wordlists'; 
+const CUSTOM_LIST_NAME = "Custom Word";
+
+
 const MIN_PLAYERS = 3;
 const MAX_PLAYERS = 16;
 const MAX_IMPOSTERS = 4;
@@ -27,28 +30,36 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const { createGame, creatingPrivateGame, gameDetails } = usePrivateGameStore();
     const router = useRouter();
 
-    // Resetiramo stanje ob odprtju Modala
-    React.useEffect(() => {
-        if (isOpen) {
-            setPlayers([hostUsername || 'Host']);
-            setNewName('');
-            setWord('');
-            setImposterHint('');
-            setNumOfImposters(1);
-        }
-    }, [isOpen, hostUsername]);
-
 
     const [players, setPlayers] = useState<string[]>([hostUsername || 'Host']); 
     const [newName, setNewName] = useState('');
     const [word, setWord] = useState('');
     const [imposterHint, setImposterHint] = useState('');
     const [numOfImposters, setNumOfImposters] = useState(1);
-    
-    // Dinamično določanje max impostorjev
+
+
+    const [isListSelectorOpen, setIsListSelectorOpen] = useState(false);
+
+    const [activeListName, setActiveListName] = useState(PRESET_WORD_LISTS[0]?.name || CUSTOM_LIST_NAME);
+
+
+
+    useEffect(() => {
+        if (isOpen) {
+            setPlayers([hostUsername || 'Host']);
+            setNewName('');
+            
+     
+            if (PRESET_WORD_LISTS.length > 0 && PRESET_WORD_LISTS[0].name !== CUSTOM_LIST_NAME) {
+                 handleChooseWordList(PRESET_WORD_LISTS[0].name, true); 
+            } else {
+                 handleChooseWordList(CUSTOM_LIST_NAME, true);
+            }
+        }
+    }, [isOpen, hostUsername]);
+
+
     const maxPossibleImposters = Math.min(MAX_IMPOSTERS, Math.floor(players.length / 2));
-    
-    // Samodejna prilagoditev numOfImposters, če se število igralcev zmanjša
     if (numOfImposters > maxPossibleImposters && players.length > 0) {
         setNumOfImposters(maxPossibleImposters); 
     }
@@ -79,6 +90,38 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         setPlayers(players.filter(p => p !== name));
     };
 
+
+
+
+    const handleChooseWordList = (listName: string, silent = false) => {
+        setActiveListName(listName);
+        setIsListSelectorOpen(false);
+        
+        if (listName === CUSTOM_LIST_NAME) {
+            setWord('');
+            setImposterHint('');
+            return;
+        }
+
+        const list = PRESET_WORD_LISTS.find(l => l.name === listName);
+        
+        if (list && list.items.length > 0) {
+
+            const randomIndex = Math.floor(Math.random() * list.items.length);
+            const { word: chosenWord, hint: chosenHint } = list.items[randomIndex];
+            
+            setWord(chosenWord);
+            setImposterHint(chosenHint);
+            
+            if (!silent) toast.success(`Word chosen: "${chosenWord}" from list "${listName}".`);
+        } else {
+            toast.error("Selected list is empty or not found.");
+            handleChooseWordList(CUSTOM_LIST_NAME, true);
+        }
+    };
+
+
+
     const handleSubmit = async () => {
         if (!hostId) {
              toast.error("Host ID not found. Please re-login.");
@@ -105,7 +148,6 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         if (success && gameDetails) {
             onClose(); 
-            // TO DO: Uporabiti ID igre iz gameDetails in preusmeriti na /lobby/GAME_ID
             router.push(`/lobby/${gameDetails.id}`); 
         }
     };
@@ -129,19 +171,33 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 {/* --- GRID (2 Columns: Setup | Players) --- */}
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 overflow-y-auto pr-2">
                     
+                    {/* LEFT SIDE */}
                     <div className="md:col-span-1 flex flex-col gap-5 border-r border-white/10 md:pr-4">
                         <h3 className="text-xl font-secondary text-[#FF493C] mb-2 border-b border-[#FF493C]/50 pb-1">Game Parameters</h3>
                         
                         {/* 1. SECRET WORD */}
                         <div className="flex flex-col">
-                            <label className="text-sm text-white/70 font-primary mb-1">Secret Word / Topic:</label>
-                             <input 
-                                 className="border-2 border-white/90 bg-black/60 text-white/90 rounded-sm p-2 w-full font-primary focus:outline-none focus:border-[#FF493C] transition-colors"
-                                 value={word}
-                                 onChange={(e) => setWord(e.target.value)}
-                                 placeholder="e.g., 'Coffee' or 'Ancient Egypt'"
-                                 disabled={creatingPrivateGame}
-                             />
+                            <label className="text-sm text-white/70 font-primary mb-1 flex justify-between items-center">
+                                <span>Secret Word / Topic:</span>
+                                <button
+                                    onClick={() => setIsListSelectorOpen(true)}
+                                    className="text-xs text-[#FF493C] hover:text-white/90 border border-[#FF493C]/50 px-2 py-1 rounded transition disabled:opacity-50"
+                                    disabled={creatingPrivateGame}
+                                >
+                                    {activeListName === CUSTOM_LIST_NAME ? 'Custom Input' : `Change List (${activeListName})`} 
+                                </button>
+                            </label>
+                            <input 
+                                className="border-2 border-white/90 bg-black/60 text-white/90 rounded-sm p-2 w-full font-primary focus:outline-none focus:border-[#FF493C] transition-colors"
+                                value={word}
+                                onChange={(e) => {
+
+                                     if (activeListName !== CUSTOM_LIST_NAME) setActiveListName(CUSTOM_LIST_NAME);
+                                     setWord(e.target.value);
+                                }}
+                                placeholder={activeListName === CUSTOM_LIST_NAME ? "Enter secret word manually" : `Randomly chosen from ${activeListName}`}
+                                disabled={creatingPrivateGame}
+                            />
                         </div>
 
                          {/* 2. IMPOSTER HINT */}
@@ -150,16 +206,20 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                               <input 
                                   className="border-2 border-white/90 bg-black/60 text-white/90 rounded-sm p-2 w-full font-primary focus:outline-none focus:border-[#FF493C] transition-colors"
                                   value={imposterHint}
-                                  onChange={(e) => setImposterHint(e.target.value)}
+                                  onChange={(e) => {
+
+                                       if (activeListName !== CUSTOM_LIST_NAME) setActiveListName(CUSTOM_LIST_NAME);
+                                       setImposterHint(e.target.value);
+                                  }}
                                   placeholder="A subtle clue for the Imposter"
                                   disabled={creatingPrivateGame}
                               />
                          </div>
 
-                         {/* 3. NUMBER OF IMPOSTERS (POPRAVLJENA VERZIJA) */}
+                         {/* 3. NUMBER OF IMPOSTERS */}
                          <div className="flex flex-col">
                              <label className="text-sm text-white/70 font-primary mb-2">Number of Imposters:</label>
-                             <div className='grid grid-cols-4 gap-1'> 
+                             <div className='grid grid-cols-4 gap-3'> 
                                  {[1, 2, 3, 4].map((number) => {
                                      
                                      const isSelectable = number <= maxPossibleImposters;
@@ -200,12 +260,12 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                          </div>
                     </div>
 
+                    {/* DESNA STRAN: SEZNAM IGRALCEV (2/3 širine) */}
                     <div className="md:col-span-2 flex flex-col gap-4">
                         <h3 className="text-xl font-secondary text-white mb-2 border-b border-white/50 pb-1">
                             Agents / Suspects ({players.length} / {MAX_PLAYERS})
                         </h3>
 
-                        {/* Name input */}
                         <div className="flex gap-2">
                             <input
                                 className="flex-1 border-2 border-white/90 bg-black/60 text-white/90 rounded-sm p-2 font-primary focus:outline-none focus:border-[#FF493C] transition-colors"
@@ -226,8 +286,7 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        {/* Seznam Imen */}
-                        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar border-2 border-black/50 rounded-md p-2">
+                 <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar border-2 border-black/50 rounded-md p-2">
                             {players.length === 0 ? (
                                 <p className="text-white/50 text-center py-4">Add some suspects...</p>
                             ) : (
@@ -265,6 +324,47 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     </button>
                     <p className="text-xs text-white/50 mt-2 text-center">Players: {players.length} / Imposters: {numOfImposters}</p>
                 </div>
+
+                {/* --- WORD LIST SELECTOR MODAL (Overlay) --- */}
+                {isListSelectorOpen && (
+                    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-8">
+                        <div className="w-full max-w-md bg-black/90 p-6 rounded-xl border border-white/20 shadow-2xl">
+                            <h4 className="text-2xl font-secondary font-bold text-white mb-4 border-b border-white/30 pb-2">
+                                Select Word Source
+                            </h4>
+                            <div className="flex flex-col gap-3 max-h-60 overflow-y-auto custom-scrollbar">
+                                
+                                {PRESET_WORD_LISTS.map((list) => (
+                                    <button
+                                        key={list.name}
+                                        onClick={() => handleChooseWordList(list.name)}
+                                        className={`
+                                            w-full text-left p-3 rounded-md transition flex justify-between items-center
+                                            ${list.name === activeListName 
+                                                ? 'bg-[#FF493C] text-black font-bold'
+                                                : 'bg-[rgba(13,0,80,0.7)] text-white/90 hover:bg-[rgba(13,0,100,0.9)]'
+                                            }
+                                        `}
+                                    >
+                                        <span>
+                                            {list.name} 
+                                            {list.name === CUSTOM_LIST_NAME && <span className="text-sm ml-2 opacity-70"> (Manual Input)</span>}
+                                            {list.name !== CUSTOM_LIST_NAME && <span className="ml-2 text-xs opacity-80">{list.items.length} words</span>}
+                                            {list.name === activeListName && <span className="ml-2 text-xs opacity-80"> (Active)</span>}
+                                        </span>
+                                        <VscChevronRight />
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setIsListSelectorOpen(false)}
+                                className="w-full mt-6 py-2 bg-[#fa3d2f] text-black font-bold rounded-md hover:bg-[#ff5545] transition"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

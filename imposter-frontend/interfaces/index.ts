@@ -17,3 +17,6 @@ export type{default as voteCast} from "./publicGameInterfaces/voteCast";
 
 export type{default as ApiResponse} from "./ApiResponse"
 export type{default as ErrorResponse} from "./ErrorResponse"
+
+export type{default as WordList} from "./WordList"
+export type{default as WordItem} from "./WordItem";
