@@ -7,7 +7,7 @@ import { useEffect} from "react";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
-import Header from "@/components/header";
+import Header from "@/app/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

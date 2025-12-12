@@ -1,6 +1,6 @@
 import React from 'react'
-import SVGComponent from "../../components/fedora"
-import Header from '@/components/header'
+import SVGComponent from "../components/fedora"
+import Header from '@/app/components/header'
 
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (

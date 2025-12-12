@@ -1,9 +1,9 @@
 import React from 'react'
 
-const PrivateGame = () => {
+const PrivateGamePage = () => {
   return (
-    <div>PrivateGame</div>
+    <div>PrivateGamePage</div>
   )
 }
 
-export default PrivateGame
+export default PrivateGamePage

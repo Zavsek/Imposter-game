@@ -3,16 +3,17 @@
 import React, { useState } from 'react'
 import { VscLoading, VscAdd } from "react-icons/vsc"
 import { FaUserSecret, FaChartBar, FaGamepad } from "react-icons/fa"
+import CreatePrivateLobbyModal from '../components/CreatePrivateLobbyModel';
 
 export default function HomePage() {
   const [joinCode, setJoinCode] = useState("");
   const [loadingCreatePrivate, setLoadingCreatePrivate] = useState(false);
   const [loadingCreatePublic, setLoadingCreatePublic] = useState(false);
   const [loadingJoin, setLoadingJoin] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCreatePrivateGame = async () => {
-    setLoadingCreatePrivate(true);
-    setTimeout(() => setLoadingCreatePrivate(false), 1500);
+    setIsModalOpen(true);
   };
 
   const handleCreatePublicLobby = async () => {
@@ -133,6 +134,10 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+      <CreatePrivateLobbyModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+    />
     </div>
   );
 }
