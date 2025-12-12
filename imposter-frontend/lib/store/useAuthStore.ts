@@ -6,6 +6,11 @@ import { axiosInstance } from "../axios";
 import axios from "axios";
 import { loginRequest, loginResponse, registerRequest } from "@/interfaces";
 
+
+interface ApiResponse<T>{
+  message:string;
+  data:T;
+}
 interface AuthState {
   checkingAuth: boolean;
   registering: boolean;
@@ -40,11 +45,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       login: async (request: loginRequest) => {
         set({ checkingAuth: true });
         try {
-          const response = await axiosInstance.post<loginResponse>(
+          const response = await axiosInstance.post<ApiResponse<loginResponse>>(
             "/users/login",
             request
           );
-          const { id, username, token, createdAt } = response.data;
+          const { id, username, token, createdAt } = response.data.data;
           set({
             playerId: id,
             username: username,

@@ -86,3 +86,48 @@ body {
 .gold-glow{
    filter: "drop-shadow(0.5rem 0.5rem 50px rgba(255, 255, 255, 0.5))"
 }
+
+
+.glass-card2 {
+  background: rgba(100, 40, 40, 0.4);
+  border-radius: 5px;
+  border: 2px solid rgba(0, 0, 0, 1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 0 10px 8px rgba(13, 0, 80, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card2::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.8),
+    transparent
+  );
+}
+
+.glass-card2::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.8),
+    transparent,
+    rgba(255, 255, 255, 0.3)
+  );
+}
+

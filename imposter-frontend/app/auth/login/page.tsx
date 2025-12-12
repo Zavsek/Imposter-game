@@ -5,7 +5,7 @@ import { useAuthStore } from "@/lib/store/useAuthStore";
 import { loginRequest } from "@/interfaces";
 import { VscLoading } from "react-icons/vsc";
 import { useRouter } from "next/navigation";
-
+import { useEffect} from "react";
 
 
 
@@ -13,7 +13,9 @@ export default function LoginPage() {
   const { login, checkingAuth, isAuthenticated} = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  useEffect(()=>{
+    if(isAuthenticated) router.push('/home')
+  })
   const router = useRouter();
     const request: loginRequest = {
         email: email,

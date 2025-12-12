@@ -1,5 +1,5 @@
 import * as React from "react";
-const SVGComponent = (props) => (
+const SVGDisguise = (props) => (
   <svg
     id="Uploaded to svgrepo.com"
     xmlns="http://www.w3.org/2000/svg"
@@ -17,4 +17,4 @@ const SVGComponent = (props) => (
     />
   </svg>
 );
-export default SVGComponent;
+export default SVGDisguise;
