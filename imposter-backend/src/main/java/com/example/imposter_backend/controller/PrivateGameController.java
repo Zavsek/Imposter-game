@@ -8,11 +8,8 @@ import com.example.imposter_backend.response.PrivateGameDTO.GameDetailsDTO;
 import com.example.imposter_backend.service.PrivateGameService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
-
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/private-game/")

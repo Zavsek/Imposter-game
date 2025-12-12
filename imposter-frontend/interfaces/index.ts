@@ -16,3 +16,4 @@ export type{default as startGame} from "./publicGameInterfaces/startGame";
 export type{default as voteCast} from "./publicGameInterfaces/voteCast";
 
 export type{default as ApiResponse} from "./ApiResponse"
+export type{default as ErrorResponse} from "./ErrorResponse"
