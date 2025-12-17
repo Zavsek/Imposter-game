@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 const router = useRouter();
- const {checkAuthOnAppLoad, isAuthenticated, checkingAuth, username} = useAuthStore();
+ const {checkAuthOnAppLoad, isAuthenticated, checkingAuth, username, logout} = useAuthStore();
 
  useEffect(()=>{
   checkAuthOnAppLoad()
@@ -42,12 +42,16 @@ const router = useRouter();
     }
   }, [isAuthenticated, checkingAuth, router]);
 
+  const handleLogout = ()=>{
+    logout();
+    router.push("/auth/login/");
+  }
   return (
 
     <html lang="en">
       <body>
         <div className='w-screen h-screen  bg-[linear-gradient(160deg,#DE0F00,55%,#FF9088)] relative'>
-          <Header username={username}/>
+          <Header username={username} logout={handleLogout}/>
 
 <Toaster
           toastOptions={{

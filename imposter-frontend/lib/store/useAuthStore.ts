@@ -71,13 +71,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         }
       },
 
-      logout: () =>
+      logout: () =>{
+
         set({
           playerId: null,
           username: null,
           jwtToken: null,
           isAuthenticated: false,
-        }),
+        })
+        toast.success("Succesfully logged out")
+    } ,
         //return type of boolean to tell the program if it needs to redirect to login
       register: async (request: registerRequest): Promise<boolean> => {
         set({ registering: true });
