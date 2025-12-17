@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { VscLoading, VscAdd, VscClose, VscChevronRight } from "react-icons/vsc"
-import { FaUserSecret, FaTrashAlt, FaLock } from "react-icons/fa";
+import { FaTrashAlt, FaLock } from "react-icons/fa";
 import { usePrivateGameStore } from '@/lib/store/usePrivateGameStore';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import toast from 'react-hot-toast';
@@ -137,11 +137,11 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         }
 
         const request: createGameRequest = {
-            id: hostId, 
+            hostId: hostId, 
             names: players,
             numOfImposters: numOfImposters,
             word: word.trim(),
-            hint: imposterHint.trim(), 
+            imposterHint: imposterHint.trim(), 
         };
 
         const success = await createGame(request);

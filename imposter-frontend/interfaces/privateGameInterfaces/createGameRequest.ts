@@ -1,8 +1,8 @@
 interface createGameRequest{
-    id:number;
+    hostId:number;
     names:string[];
     numOfImposters:number;
     word:string;
-    hint:string;
+    imposterHint:string;
 }
 export default createGameRequest;

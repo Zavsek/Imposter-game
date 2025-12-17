@@ -1,6 +1,7 @@
 package com.example.imposter_backend.config;
 
 import com.example.imposter_backend.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,30 +43,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwt = authHeader.substring(7);
-        playerId = jwtService.extractSubject(jwt);
-        log.info("Extracted playerId from token: {}", playerId);
+        try {
+            jwt = authHeader.substring(7);
+            playerId = jwtService.extractSubject(jwt);
+            log.info("Extracted playerId from token: {}", playerId);
 
-        if (playerId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(playerId);
-            log.info("Loaded user details with authorities: {}", userDetails.getAuthorities());
+            if (playerId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(playerId);
+                log.info("Loaded user details with authorities: {}", userDetails.getAuthorities());
 
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                log.info("Token is valid, setting authentication");
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                log.info("Authentication set in SecurityContext: {}",
-                        SecurityContextHolder.getContext().getAuthentication());
-            } else {
-                log.warn("Token is invalid");
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    log.info("Token is valid, setting authentication");
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.info("Authentication set in SecurityContext: {}",
+                            SecurityContextHolder.getContext().getAuthentication());
+                } else {
+                    log.warn("Token is invalid");
+                }
             }
+        } catch (JwtException e) {
+            log.error("JWT token validation failed: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error processing JWT token: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
