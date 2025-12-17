@@ -2,7 +2,8 @@ import { create } from "zustand";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../axios";
 import axios from "axios";
-import { createGameRequest, privateGameDetails, ApiResponse, ErrorResponse } from "@/interfaces";
+import { createGameRequest, privateGameDetails, ApiResponse, ErrorResponse, participant } from "@/interfaces";
+import shufflePlayers from "../shufflePlayers";
 
 
 
@@ -14,9 +15,10 @@ interface PrivateGameState{
 }
 
 interface PrivateGameActions{
-    createGame: (request: createGameRequest) => Promise<boolean>; 
+    createGame: (request: createGameRequest) => Promise<privateGameDetails|null>; 
     finishGame: () => Promise<boolean>
     closeGame : () => void;
+    shufflePlayers:() => void;
 }
 
 
@@ -25,20 +27,19 @@ export const usePrivateGameStore = create<PrivateGameState & PrivateGameActions>
         creatingPrivateGame:false,
         gameDetails:null,
         finishingGame:false,
-        
-        createGame: async (request: createGameRequest): Promise<boolean> =>{
+        createGame: async (request: createGameRequest): Promise<privateGameDetails|null> =>{
             set({creatingPrivateGame:true})
             try{
                 const response = await axiosInstance.post<ApiResponse<privateGameDetails>>("/private-game/", request);
                 if (!response.data.data) {
                     toast.error("Server returned success, but game details are missing.");
-                    return false;
+                    return null;
                 }
                 
                 const createdGame: privateGameDetails = response.data.data
                 set({gameDetails:createdGame});
                 toast.success(response.data.message || "Game Created Successfully!")
-                return true;
+                return createdGame;
                 
             } catch(error: unknown) {
                 if (axios.isAxiosError(error) && error.response) {
@@ -58,7 +59,7 @@ export const usePrivateGameStore = create<PrivateGameState & PrivateGameActions>
                 } else {
                     toast.error("An unexpected network error occurred.");
                 }
-                return false;
+                return null;
             } finally{
                 set({creatingPrivateGame : false});
             }
@@ -111,7 +112,20 @@ export const usePrivateGameStore = create<PrivateGameState & PrivateGameActions>
             }
         },
         
-
+        shufflePlayers:  () =>{
+            const currentState= get();
+            if(currentState.gameDetails){
+                const shuffledPlayers= shufflePlayers(currentState.gameDetails.participants)
+                set({gameDetails:{
+                    ...currentState.gameDetails,
+                    participants:shuffledPlayers
+                }
+            })
+            }
+            else{
+                console.warn("Game details are not present in usePrivateGameStore")
+            }
+        },
         closeGame: () =>{
             set({gameDetails:null});    
             toast("Game state cleared locally.", {icon: '🗑️'});
