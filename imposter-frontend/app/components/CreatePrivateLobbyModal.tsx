@@ -27,7 +27,7 @@ interface ModalProps {
 const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     
     const { username: hostUsername, playerId: hostId } = useAuthStore();
-    const { createGame, creatingPrivateGame, gameDetails } = usePrivateGameStore();
+    const { createGame, creatingPrivateGame } = usePrivateGameStore();
     const router = useRouter();
 
 
@@ -144,11 +144,12 @@ const CreatePrivateLobbyModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             imposterHint: imposterHint.trim(), 
         };
 
-        const success = await createGame(request);
+        const gameDetails = await createGame(request);
 
-        if (success && gameDetails) {
+        if (gameDetails) {
             onClose(); 
-            router.push(`/lobby/${gameDetails.id}`); 
+            router.push(`/privateGame/${gameDetails.id}`); 
+
         }
     };
     

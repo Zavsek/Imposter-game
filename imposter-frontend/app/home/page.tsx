@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { VscLoading, VscAdd } from "react-icons/vsc"
 import { FaUserSecret, FaChartBar, FaGamepad } from "react-icons/fa"
-import CreatePrivateLobbyModal from '../components/CreatePrivateLobbyModel';
+import CreatePrivateLobbyModal from '../components/CreatePrivateLobbyModal';
 
 export default function HomePage() {
   const [joinCode, setJoinCode] = useState("");
@@ -34,7 +34,7 @@ export default function HomePage() {
         {/* HOST OPERATION - Left side, spans 2 columns on md+ */}
         <div className="md:col-span-2">
           <div className="glass-card2 bg-black/70 backdrop-blur-md border-4 border-white/90 shadow-2xl p-8 flex flex-col justify-between rounded-xl relative overflow-hidden group w-full h-full">
-            <div className="absolute right-0 bottom-0 opacity-10 text-[16rem] translate-x-8 translate-y-8 rotate-12 group-hover:rotate-0 transition-transform duration-[900ms] pointer-events-none text-white">
+            <div className="absolute right-0 bottom-0 opacity-10 text-[16rem] translate-x-8 translate-y-8 rotate-12 group-hover:rotate-0 transition-transform duration-900ms pointer-events-none text-white">
               <FaUserSecret />
             </div>
 
@@ -99,7 +99,7 @@ export default function HomePage() {
           </div>
 
           {/* TRANSFORMED SERVICE RECORD - Now "AGENT PROFILE" with custom stats */}
-          <div className="glass-card2 bg-[rgba(13,0,80,0.7)] backdrop-blur-md border-4 border-white/90 shadow-xl p-6 flex flex-col rounded-xl w-full h-auto flex-grow">
+          <div className="glass-card2 bg-[rgba(13,0,80,0.7)] backdrop-blur-md border-4 border-white/90 shadow-xl p-6 flex flex-col rounded-xl w-full h-auto grow">
             <div className="flex items-center gap-2 mb-4 text-white">
               <FaUserSecret size={20} />
               <h3 className="text-xl font-secondary font-bold tracking-wide">AGENT PROFILE</h3>

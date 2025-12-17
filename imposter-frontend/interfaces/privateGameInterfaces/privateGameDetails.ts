@@ -4,6 +4,6 @@ interface privateGameDetails{
     id:number,
     word:string,
     imposterHint:string,
-    participants:Array<participant>
+    participants:participant[]
 }
 export default privateGameDetails;

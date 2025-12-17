@@ -1,4 +1,4 @@
 export enum Role{
-    Imposter = 1,
-    Knower = 2
+    Imposter = "IMPOSTER",
+    Knower = "KNOWER"
 }
