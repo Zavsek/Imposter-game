@@ -66,51 +66,34 @@ export const usePrivateGameStore = create<PrivateGameState & PrivateGameActions>
         },
 
        
-        finishGame: async (): Promise<boolean> =>{
-            set({finishingGame:true});
-            const currentState = get();
-            const gameId = currentState.gameDetails?.id;
-            
-            
-            if (!gameId) {
-                toast.error("Error: Cannot finish game. Game ID is missing.");
-                set({finishingGame: false});
-                return false;
-            }
-            
-            try{
-                const finishRequestTime = new Date().toISOString(); 
-                
-                const response = await axiosInstance.put<ApiResponse<null>>(`/private-game/${gameId}`, finishRequestTime, {
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                
-                set({gameDetails:null});
-                toast.success(response.data.message || "Game finished successfully and record saved.");
-                return true;
-                
-            } catch(error: unknown) {
-                if (axios.isAxiosError(error) && error.response) {
-                    
-                    const status = error.response.status;
-                    const errorData = error.response.data as ErrorResponse;
-                    const errorMessage = errorData?.message || `Server Error (Status: ${status})`;
+      
+    finishGame: async (): Promise<boolean> => {
+        set({ finishingGame: true });
+        const currentState = get();
+        const gameId = currentState.gameDetails?.id;
+    
+        if (!gameId) {
+            toast.error("Error: Cannot finish game. Game ID is missing.");
+            set({ finishingGame: false });
+            return false;
+        }
+        
+        try {
+            const finishRequestTime = new Date().toISOString(); 
+            const response = await axiosInstance.put<ApiResponse<null>>(`/private-game/${gameId}`, finishRequestTime, {
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-                    if (status === 404) {
+            toast.success(response.data.message || "Game finished successfully.");
+            return true;
+            
+        } catch (error: unknown) {
 
-                        toast.error(`Finish Error: ${errorMessage}`);
-                    } else {
-
-                        toast.error(`Finish Error: ${errorMessage}`);
-                    }
-                } else {
-                    toast.error("An unexpected network error occurred during finish.");
-                }
-                return false;
-            } finally{
-                set({finishingGame : false});
-            }
-        },
+            return false;
+        } finally {
+            set({ finishingGame: false });
+        }
+},
         
         shufflePlayers:  () =>{
             const currentState= get();
