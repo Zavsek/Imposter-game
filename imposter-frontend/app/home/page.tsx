@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { VscLoading, VscAdd } from "react-icons/vsc"
 import { FaUserSecret, FaChartBar, FaGamepad } from "react-icons/fa"
-import CreatePrivateLobbyModal from '../components/CreatePrivateLobbyModal';
+import CreatePrivateLobbyModal from '../components/privateGame/CreatePrivateLobbyModal';
 
 export default function HomePage() {
   const [joinCode, setJoinCode] = useState("");

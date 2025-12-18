@@ -83,8 +83,6 @@ export const usePrivateGameStore = create<PrivateGameState & PrivateGameActions>
             const response = await axiosInstance.put<ApiResponse<null>>(`/private-game/${gameId}`, finishRequestTime, {
                 headers: { 'Content-Type': 'application/json' }
             });
-
-            toast.success(response.data.message || "Game finished successfully.");
             return true;
             
         } catch (error: unknown) {
