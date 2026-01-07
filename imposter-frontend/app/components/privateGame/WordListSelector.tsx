@@ -9,7 +9,7 @@ interface SelectorProps {
 
 export const WordListSelector = ({ selectedLists, onSelect, onClose }: SelectorProps) => {
   
-  // Pomožna funkcija za renderiranje skupine gumbov
+
   const renderListGroup = (title: string, lists: typeof PRESET_WORD_LISTS) => (
     <div className="mb-6">
       <h5 className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em] mb-3">
@@ -50,7 +50,7 @@ export const WordListSelector = ({ selectedLists, onSelect, onClose }: SelectorP
   );
 
   return (
-    <div className="absolute inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-6 z-[60] animate-in fade-in duration-200">
+    <div className="absolute inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center p-6 z-60 animate-in fade-in duration-200">
       <div className="w-full max-w-md bg-zinc-900 border border-white/10 shadow-2xl flex flex-col rounded-2xl overflow-hidden max-h-[90vh]">
         
         {/* Header */}

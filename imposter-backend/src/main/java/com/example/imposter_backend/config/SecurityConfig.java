@@ -31,23 +31,22 @@ public class SecurityConfig {
     }
     @Bean
     public SecurityFilterChain jwtSecurityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                .cors(Customizer.withDefaults())
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        /*.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/users/register", "/api/users/login", "/api/users/guest").permitAll()
+            return http
+                    .cors(Customizer.withDefaults())
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/private-game/**")
-                        .hasAnyRole()
+                            .requestMatchers("/api/users/register", "/api/users/login", "/api/users/guest").permitAll()
+                            .requestMatchers("/api/private-game/**").permitAll()
 
-                        .anyRequest().authenticated())*/
 
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll())
-                        .sessionManagement(sess -> sess
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
+                            .anyRequest().permitAll()
+                    )
+                    .sessionManagement(sess -> sess
+                            .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                    .build();
 
     }
 
