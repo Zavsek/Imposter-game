@@ -23,13 +23,13 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         Bucket bucket = rateLimitService.resolveBucket(ip, path);
 
         if (bucket.tryConsume(1)) {
-            // Dodamo headerje, da frontend ve, koliko poskusov mu še ostane (opcijsko)
+
             response.addHeader("X-Rate-Limit-Remaining", String.valueOf(bucket.getAvailableTokens()));
             return true;
         } else {
             response.setStatus(429); // Too Many Requests
             response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Too many requests. Slow down, agent.\"}");
+            response.getWriter().write("{\"error\": \"Too many requests. Slow down.\"}");
             return false;
         }
     }
@@ -37,6 +37,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private String getClientIp(HttpServletRequest request) {
         String xfHeader = request.getHeader("X-Forwarded-For");
         if (xfHeader == null) return request.getRemoteAddr();
-        return xfHeader.split(",")[0]; // Za primere, ko uporabljaš proxy/Vercel
+        return xfHeader.split(",")[0];
     }
 }

@@ -7,10 +7,13 @@ import com.example.imposter_backend.response.GameDTO.PublicGameJoinDetailsDTO;
 import com.example.imposter_backend.response.GameDTO.StartGameDTO;
 import com.example.imposter_backend.service.GameService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/game/")
+@Controller
+@MessageMapping("/game")
 public class GameController {
     private final GameService gameService;
     public GameController(GameService gameService) {
@@ -24,14 +27,13 @@ public class GameController {
         GameLobbyDTO cratedGame = gameService.createGameLobby(hostId);
         return ResponseEntity.ok(new ApiResponse("Lobby created", cratedGame));
     }
-    @PostMapping("/join/{gameId}")
-    public ResponseEntity<ApiResponse> joinGame(@PathVariable("gameId") Long gameId, @RequestBody Long playerId){
-        PublicGameJoinDetailsDTO game = gameService.joinGame(gameId, playerId);
-        return ResponseEntity.ok(new ApiResponse("Game joined", game));
+    @MessageMapping("/join/{code}")
+    public void joinGame(@DestinationVariable String code, Long playerId) {
+        gameService.joinGame(code, playerId);
     }
     @PostMapping("{gameId}/start")
     public ResponseEntity<ApiResponse> startGame(@PathVariable("gameId") Long gameId, @RequestBody StartGameDTO startGameDTO){
-        PublicGameDetailsDTO details = gameService.startGame(gameId, startGameDTO);
-        return ResponseEntity.ok(new ApiResponse("Game started", details));
+        gameService.startGame(gameId, startGameDTO);
+        return ResponseEntity.ok(new ApiResponse("Game started", null));
     }
 }

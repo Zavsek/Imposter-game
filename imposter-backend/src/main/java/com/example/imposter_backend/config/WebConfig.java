@@ -14,9 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // Registriramo interceptor za vse API klice
         registry.addInterceptor(rateLimitInterceptor)
-                .addPathPatterns("/api/**") // Zaščitimo vse pod /api
-                .excludePathPatterns("/api/public/**"); // Opcijsko: izpustimo kakšne javne vire
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/public/**");
     }
 }

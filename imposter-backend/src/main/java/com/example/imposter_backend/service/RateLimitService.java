@@ -17,7 +17,6 @@ public class RateLimitService {
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
     public Bucket resolveBucket(String ip, String path) {
-        // Ključ je kombinacija IP-ja in tipa poti, da ima vsaka kategorija svoj števec
         String key = ip + ":" + getLimitCategory(path);
         return buckets.computeIfAbsent(key, k -> createNewBucket(path));
     }

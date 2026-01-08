@@ -7,6 +7,7 @@ import com.example.imposter_backend.repository.PlayerRepository;
 import com.example.imposter_backend.response.GameDTO.*;
 import com.example.imposter_backend.response.PrivateGameDTO.ParticipantDTO;
 import jakarta.transaction.Transactional;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,14 +18,20 @@ public class GameService {
     private final GameRepository gameRepository;
     private final ParticipationRepository participationRepository;
     private final PlayerRepository playerRepository;
+    private final SimpMessagingTemplate messagingTemplate;
     public GameService(GameRepository gameRepository,
                              ParticipationRepository participationRepository,
-                             PlayerRepository playerRepository)
+                             PlayerRepository playerRepository,
+                             SimpMessagingTemplate messagingTemplate)
     {
         this.gameRepository = gameRepository;
         this.participationRepository = participationRepository;
         this.playerRepository = playerRepository;
+        this.messagingTemplate = messagingTemplate;
         }
+
+
+
         @Transactional
         public GameLobbyDTO createGameLobby(Long hostId){
         Player host = playerRepository.findById(hostId).orElseThrow(() -> new IllegalArgumentException("Player with id " + hostId + " does not exist"));
@@ -37,15 +44,13 @@ public class GameService {
 
         Game createdGame = gameRepository.save(game);
 
-        Participation participation = new Participation();
-        participation.setGame(game);
-        participation.setPlayer(host);
-        participationRepository.save(participation);
-
         return new GameLobbyDTO(createdGame.getId(),code);
         }
+
+
+
         @Transactional
-        public PublicGameDetailsDTO startGame(Long gameId ,StartGameDTO startGameDTO){
+        public void startGame(Long gameId , @org.jetbrains.annotations.NotNull StartGameDTO startGameDTO){
 
             int numImposters = startGameDTO.numImposters();
             List<Participation>  participants= participationRepository.findByGameId(gameId);
@@ -70,56 +75,196 @@ public class GameService {
                     numImposters -= 1;
                 }
                 else participation.setRole(Role.KNOWER);
-                participantsDto
-                        .add(new
-                                ParticipantDTO(participation.getPlayer().getUsername(),
-                                participation.getRole().toString()));
                 participationRepository.save(participation);
+
+                String dataToShow;
+                if (participation.getRole() == Role.IMPOSTER) {
+                    dataToShow = "HINT: " + game.getHint();
+                } else {
+                    dataToShow = "WORD: " + game.getWord();
+                }
+                PlayerRoleDto privatePayload = new PlayerRoleDto(
+                        participation.getRole().toString(),
+                        dataToShow
+                );
+                messagingTemplate.convertAndSendToUser(
+                        participation.getPlayer().getId().toString(),
+                        "/queue/game-details",
+                        privatePayload
+                );
             }
 
-            return new PublicGameDetailsDTO(game.getId(),game.getWord(), game.getHint(), participantsDto );
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, "START_GAME");
         }
 
-        public PublicGameJoinDetailsDTO joinGame(Long gameId, Long playerId){
+
+
+
+        //returns PublicGameJoinDetailsDto via WebSocket
+        public void joinGame(String code, Long playerId){
             Player player = playerRepository.findById(playerId).orElseThrow(() -> new IllegalArgumentException("Player does not exist"));
-            Game game = gameRepository.findById(gameId).orElseThrow(() -> new IllegalArgumentException("Game does not exist"));
+            Game game = gameRepository.findByCode(code).orElseThrow(() -> new IllegalArgumentException("Game does not exist"));
             if(game.getState() != State.LOBBY){
                 throw new IllegalArgumentException("Game has already started or ended");
             }
-            boolean exists = participationRepository.existsByGameIdAndPlayerId(gameId, playerId);
+            boolean exists = participationRepository.existsByGameIdAndPlayerId(game.getId(), playerId);
             if(!exists){
             Participation participation = new Participation();
             participation.setGame(game);
             participation.setPlayer(player);
             participationRepository.save(participation);
             }
-            List<Participation> participants = participationRepository.findByGameId(gameId);
+            List<Participation> participants = participationRepository.findByGameId(game.getId());
 
             List<String> names = participants.stream()
                     .map(p->
                             p.getPlayer().getUsername()).toList();
-            return new PublicGameJoinDetailsDTO(game.getId(),  names);
+             PublicGameJoinDetailsDTO details = new PublicGameJoinDetailsDTO(game.getId(),  names);
+             messagingTemplate.convertAndSend("/topic/game/"+ game.getId(), details);
         }
 
-        public String castVote(VoteCastingDTO voteCastingDTO){
+
+        //returns VoteUpdateDto via WebSocket
+        @Transactional
+        public void castVote(VoteCastingDTO voteCastingDTO){
             Long toPlayerId = voteCastingDTO.toPlayerId();
             Long fromPlayerId = voteCastingDTO.fromPlayerId();
+            Participation voter = participationRepository.findById(fromPlayerId).orElseThrow(() -> new IllegalArgumentException("Player does not exist"));
+            if(voter.getIsEliminated() == true){
+                throw new IllegalArgumentException("Vote has already been eliminated");
+            }
             List<Player> players = participationRepository.findAllPlayersByGameId(voteCastingDTO.gameId());
-            List<Long> Ids = players.stream()
+            List<Long> ids = players.stream()
                     .map(Player::getId).toList();
-            if(!Ids.contains(fromPlayerId) ){
+            if(!ids.contains(fromPlayerId) ){
                 throw new IllegalArgumentException("Invalid from user id");
             }
-            if(!Ids.contains(toPlayerId) ){
+            if(!ids.contains(toPlayerId) ){
                 throw new IllegalArgumentException("Invalid to user id");
             }
             Player votedPlayer = players.stream().filter(p->p.getId().equals(toPlayerId)).findFirst().get();
             Participation participation = participationRepository.findByGameIdAndPlayerId(voteCastingDTO.gameId(), fromPlayerId);
             participation.setVote(votedPlayer);
-            return "Successfully voted for " +votedPlayer.getUsername();
+            participationRepository.save(participation);
+            VoteUpdateDto update = new VoteUpdateDto(
+                    voteCastingDTO.fromPlayerId(),
+                    true
+            );
+            messagingTemplate.convertAndSend("/topic/game/" + voteCastingDTO.gameId() + "/votes", update);
 
         }
-        public String generateRandomCode(int length){
+    @Transactional
+    public void processVotingRound(Long gameId) {
+        List<Participation> participations = participationRepository.findByGameId(gameId);
+
+        Map<Long, Integer> voteCount = new HashMap<>();
+        for (Participation p : participations) {
+            if (p.getvotedForPlayer() != null) {
+                Long votedId = p.getvotedForPlayer().getId();
+                voteCount.put(votedId, voteCount.getOrDefault(votedId, 0) + 1);
+            }
+        }
+
+        // 2. Logika izločanja
+        if (voteCount.isEmpty()) {
+
+            resetVotesForNextRound(participations);
+
+            Map<String, Object> nextRoundData = new HashMap<>();
+            nextRoundData.put("status", "NEXT_ROUND");
+            nextRoundData.put("lastEliminatedId", null);
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, (Object) nextRoundData);
+            return;
+        }
+
+
+        int maxVotes = Collections.max(voteCount.values());
+        List<Long> candidates = voteCount.entrySet().stream()
+                .filter(entry -> entry.getValue() == maxVotes)
+                .map(Map.Entry::getKey)
+                .toList();
+
+        Long eliminatedPlayerId;
+        if (candidates.size() > 1) {
+
+            List<Long> mutableCandidates = new ArrayList<>(candidates);
+            Collections.shuffle(mutableCandidates);
+            eliminatedPlayerId = mutableCandidates.get(0);
+        } else {
+            eliminatedPlayerId = candidates.get(0);
+        }
+
+
+        final Long targetId = eliminatedPlayerId;
+        Participation eliminatedParticipation = participations.stream()
+                .filter(p -> p.getPlayer().getId().equals(targetId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player not found in this game"));
+
+        eliminatedParticipation.setIsEliminated(true);
+        participationRepository.save(eliminatedParticipation);
+
+
+        long numberOfImposters = participations.stream()
+                .filter(p -> p.getRole() == Role.IMPOSTER)
+                .count();
+
+        long totalEliminated = participations.stream()
+                .filter(Participation::getIsEliminated)
+                .count();
+
+        if (totalEliminated >= numberOfImposters) {
+            finishGame(gameId, participations);
+        } else {
+            resetVotesForNextRound(participations);
+
+            Map<String, Object> nextRoundData = new HashMap<>();
+            nextRoundData.put("status", "NEXT_ROUND");
+            nextRoundData.put("lastEliminatedId", eliminatedPlayerId);
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, (Object) nextRoundData);
+        }
+    }
+        //returns Map containing game status, result, list of imposters and list od voted out users
+    @Transactional
+    private void finishGame(Long gameId, List<Participation> participations) {
+        Game game =  gameRepository.findById(gameId).orElseThrow(() -> new IllegalArgumentException("Game not found"));
+        game.setFinishedAt(LocalDateTime.now());
+        game.setState(State.FINISHED);
+        gameRepository.save(game);
+
+        List<Participation> eliminatedParticipations = participations.stream()
+                .filter(Participation::getIsEliminated)
+                .toList();
+
+
+        boolean allEliminatedWereImposters = eliminatedParticipations.stream()
+                .allMatch(p -> p.getRole() == Role.IMPOSTER);
+
+
+        List<String> imposters = participations.stream()
+                .filter(p-> p.getRole().equals(Role.IMPOSTER))
+                .map(Participation::getPlayer)
+                .map(Player::getUsername)
+                .toList();
+
+        Map<String, Object> results = new HashMap<>();
+        results.put("status", "FINISHED");
+        results.put("impostersEliminated",  allEliminatedWereImposters);
+        results.put("imposters", imposters);
+        results.put("eliminatedPlayers",  eliminatedParticipations.stream()
+                .map(p->p.getPlayer().getUsername())
+                .toList());
+        messagingTemplate.convertAndSend("/topic/game/" + gameId, (Object) results);
+
+
+    }
+    private void resetVotesForNextRound(List<Participation> participations) {
+        for (Participation p : participations) {
+            p.setVote(null);
+            participationRepository.save(p);
+        }
+    }
+    public String generateRandomCode(int length){
             Random random = new Random();
             String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             StringBuilder sb = new StringBuilder("");

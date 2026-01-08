@@ -13,6 +13,9 @@ public class Participation {
     @Column(name="role", nullable = false)
     private Role role;
 
+    @Column(name="is_eliminated", nullable = false)
+    private Boolean isEliminated = false;
+
     @ManyToOne
     @JoinColumn(name="player_id", nullable = false)
     private Player player;
@@ -30,6 +33,9 @@ public class Participation {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+    public void setIsEliminated(Boolean isEliminated) {
+        this.isEliminated = isEliminated;
     }
 
     public void setPlayer(Player player) {
@@ -51,7 +57,9 @@ public class Participation {
     public Role getRole() {
         return role;
     }
-
+    public Boolean getIsEliminated() {
+        return isEliminated;
+    }
     public Player getPlayer() {
         return player;
     }
