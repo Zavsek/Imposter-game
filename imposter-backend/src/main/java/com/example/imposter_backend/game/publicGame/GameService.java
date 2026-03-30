@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.example.imposter_backend.game.CommonUtils.validateImposterCountIsValid;
+
 @Service
 public class GameService {
     private final GameRepository gameRepository;
@@ -83,7 +85,7 @@ public class GameService {
             int numOfImposters = startGameDTO.numImposters();
             List<Participation>  participants= participationRepository.findByGameId(gameId);
 
-            validateImposterCountIsValid(numOfImposters, participants);
+            validateImposterCountIsValid(numOfImposters, participants.size());
             Game game = updateGameStatesAndReturnGame(gameId, startGameDTO.word(), startGameDTO.hint());
 
             setPlayerRolesAndNotify(participants, numOfImposters, game);
@@ -93,16 +95,7 @@ public class GameService {
 
         //HELPERS
 
-        private void validateImposterCountIsValid(int numImposters,
-                                                  List<Participation> participants) {
 
-        if(participants.size() < 3 || participants.size() > 16) {
-            throw new IllegalArgumentException("There must be between 3 and 16 names");
-        }
-        if(numImposters < 1  || numImposters > participants.size()/2 || numImposters > 4) {
-            throw new IllegalArgumentException("Invalid number of imposters, there can only between 1 and 4 imposters, and the number of imposters cannot exceed half the number of players");
-        }
-    }
 
         private Game updateGameStatesAndReturnGame(Long gameId,
                                                    String word,
