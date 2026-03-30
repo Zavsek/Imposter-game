@@ -1,6 +1,6 @@
 package com.example.imposter_backend.config;
 
-import com.example.imposter_backend.service.JwtService;
+import com.example.imposter_backend.auth.services.JwtService;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
