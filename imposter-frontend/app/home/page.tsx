@@ -72,7 +72,7 @@ export default function HomePage() {
 
         {/* RIGHT COLUMN - Join and Service Record */}
         <div className="flex flex-col gap-4 md:col-span-1">
-          {/* JOIN FREQUENCY */}
+
           <div className="glass-card2 bg-black/70 backdrop-blur-md border-4 border-white/90 shadow-xl p-6 flex flex-col justify-center rounded-xl w-full h-auto">
             <div className="flex items-center gap-2 mb-3 text-[#FF493C]">
               <FaGamepad size={20} />

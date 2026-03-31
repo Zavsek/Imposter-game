@@ -1,29 +1,57 @@
- 'use client'
-import React from 'react'
-import SVGComponent from './fedora'
-import SVGDisguise from "./disguise.jsx"
+'use client'
+import React, { useState, useRef, useEffect } from 'react'
+import Logo from './Header/HeaderLogo'
+import UserBadge from './Header/UserBadge'
+import UserDropdown from './Header/UserDropdown'
 
-interface headerProps{
-  username:string|null
-  logout: ()=>void
+interface HeaderProps {
+  username: string | null
+  logout: () => void
 }
-const Header: React.FC<headerProps> = ({username, logout}) => {
-  
+
+const Header: React.FC<HeaderProps> = ({ username, logout }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div className='absolute top-0 min-w-screen h-20 flex justify-center items-center bg-black font-primary border-b-9 border-[rgba(13,0,80,0.8)]'>
-        <h1 className='text-6xl text-[#fa3d2f] px-10 '>IMPOSTER</h1>
-       {username !== null && username !== "" && (
-  <div className='flex flex-row absolute right-5 m-auto items-center bg-[rgba(26,10,160,0.8)] min-h-10 w-fit px-2 pr-3 rounded-3xl font-sans font-semibold text-xl text-[#fa3d2f]' >
-    <div className="min-w-8 max-h-8  rounded-2xl bg-[rgba(13,0,80,1)] mr-2 border-4 border-[rgba(13,0,80,1)] ">
-    <SVGDisguise className="max-w-7.5 max-h-7.5 bg-[#fa3d2f] rounded-2xl"  />
-    </div>
-    {username}
-        <button className=' bg-white h-10 w-fit absolute right-50 px-10 rounded-3xl'
-        onClick={logout}> Logout</button>
-  </div>
-)}
-    </div>
+    <header className='fixed top-0 left-0 w-full h-20 bg-black border-b-4 border-[rgba(13,0,80,0.8)] z-50 px-4 md:px-8'>
+      <div className='grid grid-cols-3 items-center h-full w-full max-w-[1400px] mx-auto'>
+        
+        <div className='hidden md:block' />
+
+        <Logo />
+
+        <div className='justify-self-end' ref={dropdownRef}>
+          {username && (
+            <div className='relative'>
+              <UserBadge 
+                username={username} 
+                isOpen={isOpen} 
+                onClick={() => setIsOpen(!isOpen)} 
+              />
+              {isOpen && (
+                <UserDropdown 
+                  username={username} 
+                  onLogout={() => { logout(); setIsOpen(false); }} 
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+      </div>
+    </header>
   )
 }
 
-export default Header
+export default Header;

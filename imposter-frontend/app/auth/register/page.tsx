@@ -76,7 +76,7 @@ export default function RegisterPage() {
 
            <input 
             className="border-2 border-white/90 bg-black/60 text-white/80 rounded-sm p-2 w-full mt-3 font-primary"
-            placeholder="username"
+            placeholder="Username"
             value={username}
             onChange={(e)=>setUsername(e.target.value)}
           />
@@ -91,7 +91,7 @@ export default function RegisterPage() {
           <p className='text-red-500 text-xs absolute'>{emailError}</p>
     
           <input 
-            className="border-2 border-white/90 bg-black/60 text-white/80 rounded-sm p-2 w-full mt-5 font-primary"
+            className="border-2 border-white/90 bg-black/60 text-white/80 rounded-sm p-2 w-full mt-10 font-primary"
             type="password"
             placeholder="Password"
             value={password}
