@@ -29,8 +29,8 @@ public class AuthService {
         this.jwtService = jwtService;
     }
     public String hashPassword(String password){
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        return hashedPassword;
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+
     }
 
     public void checkPassword(String password, String hashedPassword){
@@ -39,18 +39,18 @@ public class AuthService {
     }
     @Transactional
     public String register (RegistrationRequestDTO request){
-
-        if(authRepository.existsByEmail(request.email())){
+        String email = request.email().toLowerCase();
+        if(authRepository.existsByEmail(email)){
             throw new IllegalArgumentException("Email is already registered");
         }
-        if(!checkEmailValidity(request.email())){
+        if(!checkEmailValidity(email)){
             throw new IllegalArgumentException("Email is not valid");
         }
 
-        Auth auth = createAndSaveAuthInstance(request.email(), request.password());
+        Auth auth = createAndSaveAuthInstance(email, request.password());
         createAndSavePlayerInstance(request.username(), auth);
 
-        return "Registration Successfull";
+        return "Registration Successful";
     }
 
     private void createAndSavePlayerInstance(String username, Auth auth) {
@@ -76,7 +76,8 @@ public class AuthService {
     // ------------------------------------------------------------------------------------------
 
     public LoginResponseDTO login(LoginRequestDTO request){
-            Auth auth= authRepository.findByEmail(request.email()).orElseThrow(()-> new IllegalArgumentException("Credential not found"));
+            Auth auth= authRepository.findByEmail(request.email().toLowerCase())
+                    .orElseThrow(()-> new IllegalArgumentException("Credential not found"));
 
 
                 checkPassword(request.password(), auth.getHashedPassword());

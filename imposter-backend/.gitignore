@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+
+/.env
+/imposter.log
+/imposter.log.2026-03-15.0.gz
 ### STS ###
 .apt_generated
 .classpath
